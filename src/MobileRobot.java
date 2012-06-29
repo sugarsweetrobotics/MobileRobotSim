@@ -26,14 +26,15 @@ public class MobileRobot implements RtcNewFunc, RtcDeleteFunc, RegisterModuleFun
     	    "type_name",         "MobileRobot",
     	    "description",       "Mobile Vehicle Robot RTC",
     	    "version",           "1.0.0",
-    	    "vendor",            "ysuga.net",
-    	    "category",          "Demonstration",
+    	    "vendor",            "ysuga_net",
+    	    "category",          "Example",
     	    "activity_type",     "STATIC",
     	    "max_instance",      "1",
     	    "language",          "Java",
     	    "lang_type",         "compile",
             // Configuration variables
-            "conf.default.debug", "0",
+            //"conf.default.debug", "0",
+            "conf.default.color", "red",
             // Widget
             "conf.__widget__.debug", "text",
             // Constraints

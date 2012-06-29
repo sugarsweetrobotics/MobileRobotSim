@@ -20,6 +20,7 @@ public class VehicleSimPanel extends JPanel implements SimParam {
 		vehicle = new Vehicle(this, SimParam.INIT_X, SimParam.INIT_Y,
 				SimParam.INIT_THETA);
 		vehicle.setVelocity(0, 0, 0);
+		vehicle.setOffset(SimParam.INIT_X, SimParam.INIT_Y, SimParam.INIT_THETA);
 		setPreferredSize(new Dimension(SimParam.BOUND + 20, SimParam.BOUND + 20));
 	}
 	
@@ -37,12 +38,62 @@ public class VehicleSimPanel extends JPanel implements SimParam {
 		return vehicle;
 	}
 
+	public void checkBump() {
+		double x = vehicle.getX();
+		double y = vehicle.getY();
+		double th = vehicle.getTh();
+		boolean right = false, left = false;
+		
+		vehicle.setHit(false, false);
+		
+		if(x > SimParam.BOUND/2 -5 - SimParam.RADIUS) {
+			if( (th < Math.PI/2 && th > -Math.PI*1/6)){
+				left = true;
+			}
+			if( (th < Math.PI*1/6 && th > -Math.PI/2 ) ){
+				right = true;
+			}
+		}
+		
+		if(y < -SimParam.BOUND/2 + 5 + SimParam.RADIUS) {
+			if( (th > -Math.PI && th < -Math.PI*2/6)) {
+				right = true;
+			}
+			if( (th > -Math.PI*4/6 && th < 0)) {
+				left = true;
+			}
+		}
+		
+		if(x < -SimParam.BOUND/2 +5 + SimParam.RADIUS) {
+			if( (th > Math.PI/2 && th <= Math.PI) || (th > -Math.PI && th < -Math.PI*5/6)){
+				right = true;
+			}
+			if( (th < -Math.PI/2 && th > -Math.PI ) || (th <= Math.PI && th > Math.PI*5/6) ) {
+				left = true;
+			}
+		}
+
+		if(y > SimParam.BOUND/2 - 5 - SimParam.RADIUS) {
+			if( th > 0 && th < Math.PI*4/6) {
+				right = true;
+			}
+			if( th > Math.PI*2/6 && th <= Math.PI) {
+				left = true;
+			}
+		}
+		//SimParam.BOUND
+
+		vehicle.setHit(right, left);
+	}
 
 	/**
 	 * •`‰æŠÖ”
 	 */
 	@Override
 	public void paint(Graphics g) {
+		
+		checkBump();
+		
 		Graphics2D g2d = (Graphics2D) g;
 		Dimension d = getSize();
 		Rectangle2D rect = new Rectangle2D.Double(0, 0, SimParam.BOUND,
@@ -55,7 +106,7 @@ public class VehicleSimPanel extends JPanel implements SimParam {
 
 		vehicle.draw(g2d);
 
-		g.drawString("Battery:" + Float.toString(vehicle.getBatteryByPercent()), 0, 20);
+		//g.drawString("Battery:" + Float.toString(vehicle.getBatteryByPercent()), 0, 20);
 	}
 
 	/**

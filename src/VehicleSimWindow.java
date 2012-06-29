@@ -29,8 +29,10 @@ public class VehicleSimWindow extends JFrame {
 				new JScrollPane(panel));
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(600, 600);
+		setSize(640, 660);
+		
 		setVisible(true);
+		repaint();
 	}
 
 	/**

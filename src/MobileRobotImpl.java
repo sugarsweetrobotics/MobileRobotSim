@@ -7,16 +7,21 @@
  * $Id$
  */
 
-import RTC.TimedDouble;
-import RTC.TimedVelocity2D;
-import RTC.TimedPose2D;
+import java.awt.Color;
+
 import jp.go.aist.rtm.RTC.DataFlowComponentBase;
 import jp.go.aist.rtm.RTC.Manager;
 import jp.go.aist.rtm.RTC.port.InPort;
 import jp.go.aist.rtm.RTC.port.OutPort;
 import jp.go.aist.rtm.RTC.util.DataRef;
 import jp.go.aist.rtm.RTC.util.IntegerHolder;
+import jp.go.aist.rtm.RTC.util.StringHolder;
 import RTC.ReturnCode_t;
+import RTC.Time;
+import RTC.TimedBooleanSeq;
+import RTC.TimedDouble;
+import RTC.TimedPose2D;
+import RTC.TimedVelocity2D;
 
 /*!
  * @class MobileRobotImpl
@@ -26,8 +31,15 @@ import RTC.ReturnCode_t;
 public class MobileRobotImpl extends DataFlowComponentBase {
 
     
-    VehicleSimWindow frame;
-    Vehicle vehicle;
+	/**
+	 * @brief Simulator's Frame
+	 */
+    private VehicleSimWindow frame;
+    
+    /**
+     * @brief Robot
+     */
+    private Vehicle vehicle;
     
     
   /*!
@@ -46,11 +58,17 @@ public class MobileRobotImpl extends DataFlowComponentBase {
         m_batteryVoltage_val = new TimedDouble();
         m_batteryVoltage = new DataRef<TimedDouble>(m_batteryVoltage_val);
         m_batteryOut = new OutPort<TimedDouble>("battery", m_batteryVoltage);
+        m_bump_val = new TimedBooleanSeq();
+        m_bump = new DataRef<TimedBooleanSeq>(m_bump_val);
+        m_bumpOut = new OutPort<TimedBooleanSeq>("bumper", m_bump);
         // </rtc-template>
 
         
         frame = new VehicleSimWindow();
     	vehicle = frame.getVehicle();
+    	vehicle.setPose(0, 0, 0);
+    	vehicle.refreshPosition();
+    	frame.repaint();
     }
 
     /*!
@@ -71,10 +89,12 @@ public class MobileRobotImpl extends DataFlowComponentBase {
         
         // Set OutPort buffer
 
-        addOutPort("battery", m_batteryOut);
+        //addOutPort("battery", m_batteryOut);
         addOutPort("pos", m_posOut);
+        addOutPort("bumper", m_bumpOut);
         // </rtc-template>
         bindParameter("debug", m_debug, "0");
+        bindParameter("color", m_color, "red");
         return super.onInitialize();
     }
 
@@ -137,6 +157,7 @@ public class MobileRobotImpl extends DataFlowComponentBase {
      */
     @Override
     protected ReturnCode_t onActivated(int ec_id) {
+    	vehicle.setPose(0, 0, 0);
     	frame.start();
         return super.onActivated(ec_id);
     }
@@ -171,21 +192,46 @@ public class MobileRobotImpl extends DataFlowComponentBase {
      */
     @Override
     protected ReturnCode_t onExecute(int ec_id) {
+    	if(m_color.value.equals("red")) {
+    		vehicle.setColor(Color.red);
+    	} else if(m_color.value.equals("green")) {
+    		vehicle.setColor(Color.green);    		
+    	} else if(m_color.value.equals("blue")) {
+    		vehicle.setColor(Color.blue);
+    	} else if(m_color.value.equals("yellow")) {
+    		vehicle.setColor(Color.yellow);
+    	} else if(m_color.value.equals("pink")) {
+    		vehicle.setColor(Color.pink);
+    	} else if(m_color.value.equals("orange")) {
+    		vehicle.setColor(Color.orange);
+    	} else if(m_color.value.equals("black")) {
+    		vehicle.setColor(Color.black);
+    	} else if(m_color.value.equals("gray")) {
+    		vehicle.setColor(Color.gray);
+    	} 
+    	
     	if(m_velIn.isNew()) {
     		m_velIn.read();
-    		
-    		new RTC.TimedVelocity2D();
-    		vehicle.setVelocity(m_vel.v.data.vx, m_vel.v.data.vy, m_vel.v.data.va);
+    		vehicle.setVelocity(m_vel.v.data.vx, -m_vel.v.data.vy, -m_vel.v.data.va);
     	}
     	vehicle.refreshPosition();
     	
-    	m_batteryVoltage.v.tm = new RTC.Time();
-    	m_batteryVoltage.v.data = vehicle.getBatteryVoltage();
-    	m_batteryOut.write();
+    	//m_batteryVoltage.v.tm = new RTC.Time();
+    	//m_batteryVoltage.v.data = vehicle.getBatteryVoltage();
+    	//m_batteryOut.write();
     	
     	m_pos.v.tm = new RTC.Time();
-    	m_pos.v.data = new RTC.Pose2D(new RTC.Point2D(vehicle.x, vehicle.y), vehicle.theta);
+    	double th = -vehicle.getTh();
+    	if(th < 0) { th += Math.PI * 2; }
+    	m_pos.v.data = new RTC.Pose2D(new RTC.Point2D(vehicle.getX(), -vehicle.getY()), th);
     	m_posOut.write();
+    	
+    	m_bump.v.tm = new RTC.Time();
+    	m_bump.v.data = new boolean[2];
+    	m_bump.v.data[0] = vehicle.getRightBump();
+    	m_bump.v.data[1] = vehicle.getLeftBump();
+    	m_bumpOut.write();
+    	
         return super.onExecute(ec_id);
     }
 
@@ -277,6 +323,8 @@ public class MobileRobotImpl extends DataFlowComponentBase {
      * - DefaultValue: 0
      */
     protected IntegerHolder m_debug = new IntegerHolder();
+    
+    protected StringHolder m_color = new StringHolder();
 	// </rtc-template>
 
     // DataInPort declaration
@@ -305,6 +353,10 @@ public class MobileRobotImpl extends DataFlowComponentBase {
      */
     protected OutPort<TimedDouble> m_batteryOut;
 
+    protected TimedBooleanSeq m_bump_val;
+    
+    protected DataRef<TimedBooleanSeq> m_bump;
+    protected OutPort<TimedBooleanSeq> m_bumpOut;
     
     // </rtc-template>
 

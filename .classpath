@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="var" path="RTM_JAVA_ROOT"/>
-	<classpathentry kind="var" path="COMMONS_CLI_ROOT"/>
+	<classpathentry kind="var" path="RTM_ROOT_JAVA/commons-cli-1.1.jar"/>
+	<classpathentry kind="var" path="RTM_ROOT_JAVA/OpenRTM-aist-1.1.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
