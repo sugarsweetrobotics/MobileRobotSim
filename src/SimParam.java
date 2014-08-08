@@ -4,7 +4,7 @@ import java.awt.Color;
 
 public interface SimParam {
 
-	public int BOUND =  600;
+	public int BOUND =  1000;
 	public int INIT_X = BOUND/2;
 	public int INIT_Y = BOUND/2;
 	public int RADIUS = (int)(BOUND*0.05);
